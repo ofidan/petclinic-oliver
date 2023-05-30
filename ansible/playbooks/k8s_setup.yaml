@@ -101,7 +101,7 @@
      - chown ubuntu:ubuntu /home/ubuntu/.kube/config
 
   - name: Install flannel pod network
-    shell: kubectl apply -f https://github.com/coreos/flannel/raw/master/Documentation/kube-flannel.yml
+    shell: su - ubuntu -c 'kubectl apply -f https://github.com/coreos/flannel/raw/master/Documentation/kube-flannel.yml'
 
   - name: Generate join command
     become: true
