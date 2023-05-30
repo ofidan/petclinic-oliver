@@ -57,10 +57,11 @@
 
   - name: change the Docker cgroup
     shell: |
-      echo '{"exec-opts": ["native.cgroupdriver=systemd"]}' | sudo tee /etc/docker/daemon.json
-      sudo systemctl daemon-reload
-      sudo systemctl restart docker
-      sudo systemctl restart kubelet
+      mkdir /etc/containerd
+      containerd config default | sudo tee /etc/containerd/config.toml >/dev/null 2>&1
+      sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/config.toml
+      systemctl restart containerd
+      systemctl enable containerd
 
 
 - hosts: role_master
@@ -87,21 +88,22 @@
       export CONTROLPLANE_ENDPOINT={{ hostvars[inventory_hostname]['private_ip_address'] }}
       envsubst < /home/ubuntu/clusterconfig-base.yml > /home/ubuntu/clusterconfig.yml
 
-  # - name: initialize the Kubernetes cluster using kubeadm
-  #   become: true
-  #   shell: |
-  #     kubeadm init --config /home/ubuntu/clusterconfig.yml
+  - name: initialize the Kubernetes cluster using kubeadm
+    become: true
+    shell: |
+      kubeadm init --config /home/ubuntu/clusterconfig.yml
     
-  # - name: Setup kubeconfig for ubuntu user
-  #   become: true
-  #   command: "{{ item }}"
-  #   with_items:
-  #    - mkdir -p /home/ubuntu/.kube
-  #    - cp -i /etc/kubernetes/admin.conf /home/ubuntu/.kube/config
-  #    - chown ubuntu:ubuntu /home/ubuntu/.kube/config
+  - name: Setup kubeconfig for ubuntu user
+    become: true
+    command: "{{ item }}"
+    with_items:
+     - mkdir -p /home/ubuntu/.kube
+     - cp -i /etc/kubernetes/admin.conf /home/ubuntu/.kube/config
+     - chown ubuntu:ubuntu /home/ubuntu/.kube/config
 
   - name: Install flannel pod network
-    shell: su - ubuntu -c 'kubectl apply -f https://github.com/coreos/flannel/raw/master/Documentation/kube-flannel.yml'
+    remote_user: ubuntu
+    shell: kubectl apply -f https://github.com/coreos/flannel/raw/master/Documentation/kube-flannel.yml
 
   - name: Generate join command
     become: true
