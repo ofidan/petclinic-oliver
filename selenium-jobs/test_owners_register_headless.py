@@ -17,10 +17,10 @@ APP_IP = os.environ['MASTER_PUBLIC_IP']
 url = "http://"+APP_IP.strip()+":30001/"
 print(url)
 driver.get(url)
-owners_link = driver.find_element_by_link_text("OWNERS")
+owners_link = driver.find_element("link text", "OWNERS")
 owners_link.click()
 sleep(2)
-all_link = driver.find_element_by_link_text("REGISTER")
+all_link = driver.find_element("link text", "REGISTER")
 all_link.click()
 sleep(2)
 # Register new Owner to Petclinic App
