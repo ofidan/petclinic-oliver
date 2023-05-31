@@ -20,7 +20,7 @@ url = "http://"+APP_IP.strip()+":30001/"
 print(url)
 driver.get(url)
 sleep(3)
-vet_link = driver.find_element_by_link_text("VETERINARIANS")
+vet_link = driver.find_element("link text", "VETERINARIANS")
 vet_link.click()
 
 # Verify that table loaded
